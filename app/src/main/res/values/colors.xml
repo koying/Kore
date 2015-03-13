@@ -76,4 +76,7 @@
 
     <color name="solarized_orange_dark">#ffc73a00</color>
 
+    <color name="kodi_base">#31afe1</color>
+    <color name="search_opaque">#ffaa3f</color>
+
 </resources>
