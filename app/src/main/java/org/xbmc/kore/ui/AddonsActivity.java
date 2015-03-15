@@ -16,16 +16,16 @@
 package org.xbmc.kore.ui;
 
 import android.annotation.TargetApi;
+import android.app.ActionBar;
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
-import android.support.v7.widget.Toolbar;
 import android.transition.TransitionInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
+import android.widget.Toolbar;
 
 import org.xbmc.kore.R;
 import org.xbmc.kore.utils.LogUtils;
@@ -58,7 +58,7 @@ public class AddonsActivity extends BaseActivity
         setContentView(R.layout.activity_generic_media);
 
         // Set up the drawer.
-        navigationDrawerFragment = (NavigationDrawerFragment)getSupportFragmentManager()
+        navigationDrawerFragment = (NavigationDrawerFragment)getFragmentManager()
                 .findFragmentById(R.id.navigation_drawer);
         navigationDrawerFragment.setUp(R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout));
 
@@ -72,7 +72,7 @@ public class AddonsActivity extends BaseActivity
                         .from(this)
                         .inflateTransition(android.R.transition.fade));
             }
-            getSupportFragmentManager()
+            getFragmentManager()
                     .beginTransaction()
                     .add(R.id.fragment_container, addonListFragment)
                     .commit();
@@ -127,7 +127,7 @@ public class AddonsActivity extends BaseActivity
                     selectedAddonId = null;
                     selectedAddonTitle = null;
                     setupActionBar(null);
-                    getSupportFragmentManager().popBackStack();
+                    getFragmentManager().popBackStack();
                     return true;
                 }
                 break;
@@ -150,10 +150,7 @@ public class AddonsActivity extends BaseActivity
     }
 
     private void setupActionBar(String addonTitle) {
-        Toolbar toolbar = (Toolbar)findViewById(R.id.default_toolbar);
-        setSupportActionBar(toolbar);
-
-        ActionBar actionBar = getSupportActionBar();
+        ActionBar actionBar = getActionBar();
         if (addonTitle != null) {
             navigationDrawerFragment.setDrawerIndicatorEnabled(false);
             actionBar.setTitle(addonTitle);
@@ -176,7 +173,7 @@ public class AddonsActivity extends BaseActivity
 
         // Replace list fragment
         AddonDetailsFragment addonDetailsFragment = AddonDetailsFragment.newInstance(addonId);
-        FragmentTransaction fragTrans = getSupportFragmentManager().beginTransaction();
+        FragmentTransaction fragTrans = getFragmentManager().beginTransaction();
 
         // Set up transitions
         if (Utils.isLollipopOrLater()) {

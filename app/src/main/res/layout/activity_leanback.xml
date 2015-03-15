@@ -22,7 +22,7 @@
 
     <fragment
         android:name="org.xbmc.kore.ui.tv.LeanbackMainFragment"
-        android:id="@+id/lenaback_main_fragment"
+        android:id="@+id/leanback_main_fragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

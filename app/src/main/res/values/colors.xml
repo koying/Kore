@@ -76,7 +76,12 @@
 
     <color name="solarized_orange_dark">#ffc73a00</color>
 
-    <color name="kodi_base">#31afe1</color>
+    <color name="kore_base">#0176bb</color>
     <color name="search_opaque">#ffaa3f</color>
+    <color name="lb_default_background">#0096a6</color>
+    <color name="lb_selected_background">#ffaa3f</color>
+    <color name="lb_background_gradient_start">#000000</color>
+    <color name="lb_background_gradient_end">#DDDDDD</color>
+
 
 </resources>

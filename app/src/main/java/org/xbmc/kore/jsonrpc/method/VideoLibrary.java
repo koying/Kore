@@ -137,6 +137,63 @@ public class VideoLibrary {
     }
 
     /**
+     * Retrieve Recent movies
+     */
+    public static class GetRecentMovies extends ApiMethod<List<VideoType.DetailsMovie>> {
+        public final static String METHOD_NAME = "VideoLibrary.GetRecentlyAddedMovies";
+
+        private final static String LIST_NODE = "movies";
+
+        /**
+         * Retrieve all movies, without limits
+         * Caution, this can break in large libraries
+         *
+         * @param properties Properties to retrieve. See {@link VideoType.FieldsMovie} for a list of
+         *                   accepted values
+         */
+        public GetRecentMovies(String... properties) {
+            super();
+            addParameterToRequest("properties", properties);
+        }
+
+        /**
+         * Retrieve all movies, with limits
+         *
+         * @param limits Limits to retrieve. See {@link ListType.Limits}
+         * @param properties Properties to retrieve. See {@link VideoType.FieldsMovie} for a list of
+         *                   accepted values
+         */
+        public GetRecentMovies(ListType.Limits limits, String... properties) {
+            super();
+            addParameterToRequest("properties", properties);
+            addParameterToRequest("limits", limits);
+        }
+
+        @Override
+        public String getMethodName() {
+            return METHOD_NAME;
+        }
+
+        @Override
+        public List<VideoType.DetailsMovie> resultFromJson(ObjectNode jsonObject)
+                throws ApiException {
+            JsonNode resultNode = jsonObject.get(RESULT_NODE);
+            ArrayNode items = resultNode.has(LIST_NODE) ?
+                    (ArrayNode)resultNode.get(LIST_NODE) : null;
+            if (items == null) {
+                return new ArrayList<VideoType.DetailsMovie>(0);
+            }
+            ArrayList<VideoType.DetailsMovie> result = new ArrayList<VideoType.DetailsMovie>(items.size());
+
+            for (JsonNode item : items) {
+                result.add(new VideoType.DetailsMovie(item));
+            }
+
+            return result;
+        }
+    }
+
+    /**
      * Retrieve details about a specific movie
      */
     public static class GetMovieDetails extends ApiMethod<VideoType.DetailsMovie> {
@@ -145,7 +202,7 @@ public class VideoLibrary {
         /**
          * Retrieve details about a specific movie
          *
-         * @param movieId Movie id
+         * @param movieId Media id
          * @param properties Properties to retrieve. See {@link VideoType.FieldsMovie} for a list of
          *                   accepted values
          */
@@ -177,7 +234,7 @@ public class VideoLibrary {
         /**
          * Update the given movie with the given details
          *
-         * @param movieid Movie id
+         * @param movieid Media id
          */
         public SetMovieDetails(int movieid, Integer playcount, Double rating) {
             super();

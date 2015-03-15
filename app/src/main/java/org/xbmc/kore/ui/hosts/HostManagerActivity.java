@@ -18,9 +18,9 @@ package org.xbmc.kore.ui.hosts;
 
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toolbar;
 
 import org.xbmc.kore.R;
 import org.xbmc.kore.ui.BaseActivity;
@@ -45,7 +45,7 @@ public class HostManagerActivity extends BaseActivity {
         setContentView(R.layout.activity_host_manager);
 
         // Set up the drawer.
-        navigationDrawerFragment = (NavigationDrawerFragment)getSupportFragmentManager()
+        navigationDrawerFragment = (NavigationDrawerFragment)getFragmentManager()
                 .findFragmentById(R.id.navigation_drawer);
         navigationDrawerFragment.setUp(R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout));
 
@@ -76,8 +76,6 @@ public class HostManagerActivity extends BaseActivity {
     }
 
     private void setupToolbar() {
-        Toolbar toolbar = (Toolbar)findViewById(R.id.default_toolbar);
-        toolbar.setTitle(R.string.xbmc_media_center);
-        setSupportActionBar(toolbar);
+        getActionBar().setTitle(R.string.xbmc_media_center);
     }
 }

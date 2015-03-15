@@ -25,9 +25,10 @@
 
         <activity
             android:name=".ui.tv.LeanbackActivity"
-            android:icon="@drawable/videos_by_google_banner"
+            android:icon="@drawable/banner"
             android:label="@string/app_name"
-            android:logo="@drawable/videos_by_google_banner"
+            android:logo="@drawable/banner"
+            android:theme="@style/Theme.Leanback"
             android:screenOrientation="landscape" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -46,6 +47,7 @@
         <activity android:name="org.xbmc.kore.ui.AddonsActivity"/>
         <activity android:name="org.xbmc.kore.ui.SettingsActivity"/>
         <activity android:name="org.xbmc.kore.ui.FileActivity"/>
+        <activity android:name="org.xbmc.kore.ui.tv.PlaybackOverlayActivity" />
 
         <!-- Providers -->
         <provider

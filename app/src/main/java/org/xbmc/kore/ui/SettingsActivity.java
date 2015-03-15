@@ -15,12 +15,11 @@
  */
 package org.xbmc.kore.ui;
 
+import android.app.ActionBar;
+import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import org.xbmc.kore.R;
@@ -31,7 +30,7 @@ import org.xbmc.kore.utils.UIUtils;
 /**
  * Presents the Preferences fragment
  */
-public class SettingsActivity extends ActionBarActivity{
+public class SettingsActivity extends Activity {
     private static final String TAG = LogUtils.makeLogTag(SettingsActivity.class);
 
     private SettingsFragment settingsFragment;
@@ -47,9 +46,7 @@ public class SettingsActivity extends ActionBarActivity{
         setContentView(R.layout.activity_settings);
 
         // Setup action bar
-        Toolbar toolbar = (Toolbar)findViewById(R.id.default_toolbar);
-        setSupportActionBar(toolbar);
-        ActionBar actionBar = getSupportActionBar();
+        ActionBar actionBar = getActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setTitle(R.string.settings);
 

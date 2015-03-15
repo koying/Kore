@@ -17,7 +17,11 @@
 package org.xbmc.kore.ui;
 
 import android.app.AlertDialog;
+import android.app.Fragment;
+import android.app.LoaderManager;
+import android.content.CursorLoader;
 import android.content.DialogInterface;
+import android.content.Loader;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.Cursor;
@@ -25,10 +29,6 @@ import android.net.Uri;
 import android.os.*;
 import android.preference.PreferenceManager;
 import android.provider.BaseColumns;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
@@ -685,7 +685,7 @@ public class AlbumDetailsFragment extends Fragment
     }
 
     /**
-     * Movie cast list query parameters.
+     * Media cast list query parameters.
      */
     private interface AlbumSongsListQuery {
         String[] PROJECTION = {

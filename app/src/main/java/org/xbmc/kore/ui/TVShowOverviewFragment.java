@@ -439,7 +439,7 @@ public class TVShowOverviewFragment extends Fragment
     }
 
     /**
-     * Movie cast list query parameters.
+     * Media cast list query parameters.
      */
     private interface TVShowCastListQuery {
         String[] PROJECTION = {

@@ -15,10 +15,10 @@
  */
 package org.xbmc.kore.ui.hosts;
 
+import android.app.ActionBar;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.os.Bundle;
-import android.support.v7.app.ActionBar;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -78,7 +78,7 @@ public class EditHostActivity extends BaseActivity implements
                 }
             }
 
-            getSupportFragmentManager()
+            getFragmentManager()
                     .beginTransaction()
                     .add(android.R.id.content, editFragment)
                     .commit();
@@ -107,7 +107,7 @@ public class EditHostActivity extends BaseActivity implements
     }
 
     private void setupActionBar() {
-        ActionBar actionBar = getSupportActionBar();
+        ActionBar actionBar = getActionBar();
         if (actionBar != null) {
             actionBar.setTitle(R.string.edit_xbmc);
             TypedArray styledAttrs = getTheme().obtainStyledAttributes(new int[] {R.attr.iconHosts});

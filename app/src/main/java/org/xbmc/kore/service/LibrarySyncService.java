@@ -64,6 +64,7 @@ public class LibrarySyncService extends Service {
      * Possible requests to sync
      */
     public static final String SYNC_ALL_MOVIES = "sync_all_movies";
+    public static final String SYNC_RECENT_MOVIES = "sync_recent_movies";
     public static final String SYNC_SINGLE_MOVIE = "sync_single_movie";
     public static final String SYNC_ALL_TVSHOWS = "sync_all_tvshows";
     public static final String SYNC_SINGLE_TVSHOW = "sync_single_tvshow";
@@ -120,6 +121,12 @@ public class LibrarySyncService extends Service {
         boolean syncAllMovies = intent.getBooleanExtra(SYNC_ALL_MOVIES, false);
         if (syncAllMovies) {
             syncOrchestrator.addSyncItem(new SyncMovies(hostInfo.getId(), syncExtras));
+        }
+
+        // Sync recent movies
+        boolean syncRecentMovies = intent.getBooleanExtra(SYNC_RECENT_MOVIES, false);
+        if (syncRecentMovies) {
+            syncOrchestrator.addSyncItem(new SyncRecentMovies(hostInfo.getId(), syncExtras));
         }
 
         // Sync a single movie
@@ -511,6 +518,152 @@ public class LibrarySyncService extends Service {
 
             // Insert the movies
             contentResolver.bulkInsert(MediaContract.Movies.CONTENT_URI, movieValuesBatch);
+
+            ContentValues movieCastValuesBatch[] = new ContentValues[castCount];
+            int count = 0;
+            // Iterate on each movie/cast
+            for (VideoType.DetailsMovie movie : movies) {
+                for (VideoType.Cast cast : movie.cast) {
+                    movieCastValuesBatch[count] = SyncUtils.contentValuesFromCast(hostId, cast);
+                    movieCastValuesBatch[count].put(MediaContract.MovieCastColumns.MOVIEID, movie.movieid);
+                    count++;
+                }
+            }
+
+            // Insert the cast list for this movie
+            contentResolver.bulkInsert(MediaContract.MovieCast.CONTENT_URI, movieCastValuesBatch);
+        }
+    }
+
+    /**
+     * Syncs recent movies on XBMC to the local database
+     */
+    private static class SyncRecentMovies implements SyncItem {
+        private final int hostId;
+        private final Bundle syncExtras;
+
+        /**
+         * Syncs recent movies on selected XBMC to the local database
+         * @param hostId XBMC host id
+         */
+        public SyncRecentMovies(final int hostId, Bundle syncExtras) {
+            this.hostId = hostId;
+            this.syncExtras = syncExtras;
+        }
+
+        /** {@inheritDoc} */
+        public String getDescription() {
+            return "Sync recent movies for host: " + hostId;
+        }
+
+        /** {@inheritDoc} */
+        public String getSyncType() {
+            return SYNC_RECENT_MOVIES;
+        }
+
+        /** {@inheritDoc} */
+        public Bundle getSyncExtras() {
+            return syncExtras;
+        }
+
+        /** {@inheritDoc} */
+        public void sync(final SyncOrchestrator orchestrator,
+                         final HostConnection hostConnection,
+                         final Handler callbackHandler,
+                         final ContentResolver contentResolver) {
+            String properties[] = {
+                    VideoType.FieldsMovie.TITLE, VideoType.FieldsMovie.GENRE,
+                    VideoType.FieldsMovie.YEAR, VideoType.FieldsMovie.RATING,
+                    VideoType.FieldsMovie.DIRECTOR, VideoType.FieldsMovie.TRAILER,
+                    VideoType.FieldsMovie.TAGLINE, VideoType.FieldsMovie.PLOT,
+                    // VideoType.FieldsMovie.PLOTOUTLINE, VideoType.FieldsMovie.ORIGINALTITLE,
+                    // VideoType.FieldsMovie.LASTPLAYED,
+                    VideoType.FieldsMovie.PLAYCOUNT, VideoType.FieldsMovie.DATEADDED,
+                    VideoType.FieldsMovie.WRITER, VideoType.FieldsMovie.STUDIO,
+                    VideoType.FieldsMovie.MPAA, VideoType.FieldsMovie.CAST,
+                    VideoType.FieldsMovie.COUNTRY, VideoType.FieldsMovie.IMDBNUMBER,
+                    VideoType.FieldsMovie.RUNTIME, VideoType.FieldsMovie.SET,
+                    // VideoType.FieldsMovie.SHOWLINK,
+                    VideoType.FieldsMovie.STREAMDETAILS, VideoType.FieldsMovie.TOP250,
+                    VideoType.FieldsMovie.VOTES, VideoType.FieldsMovie.FANART,
+                    VideoType.FieldsMovie.THUMBNAIL, VideoType.FieldsMovie.FILE,
+                    // VideoType.FieldsMovie.SORTTITLE, VideoType.FieldsMovie.RESUME,
+                    VideoType.FieldsMovie.SETID,
+                    // VideoType.FieldsMovie.DATEADDED, VideoType.FieldsMovie.TAG,
+                    // VideoType.FieldsMovie.ART
+            };
+
+            syncMovies(orchestrator, hostConnection, callbackHandler, contentResolver, properties, 0);
+        }
+
+        /**
+         * Syncs all the movies, calling itself recursively
+         * Uses the {@link VideoLibrary.GetMovies} version with limits to make sure
+         * that Kodi doesn't blow up, and calls itself recursively until all the
+         * movies are returned
+         */
+        private void syncMovies(final SyncOrchestrator orchestrator,
+                                   final HostConnection hostConnection,
+                                   final Handler callbackHandler,
+                                   final ContentResolver contentResolver,
+                                   final String properties[],
+                                   final int startIdx) {
+            // Call GetMovies with the current limits set
+            ListType.Limits limits = new ListType.Limits(startIdx, startIdx + LIMIT_SYNC_MOVIES);
+            VideoLibrary.GetRecentMovies action = new VideoLibrary.GetRecentMovies(limits, properties);
+            action.execute(hostConnection, new ApiCallback<List<VideoType.DetailsMovie>>() {
+                @Override
+                public void onSucess(List<VideoType.DetailsMovie> result) {
+                    if (startIdx == 0) {
+                        // First call, delete movies from DB
+                        deleteRecentMovies(contentResolver, hostId);
+                    }
+                    if (result.size() > 0) {
+                        insertRecentMovies(orchestrator, contentResolver, result);
+                    }
+
+                    LogUtils.LOGD(TAG, "syncRecentMovies, movies gotten: " + result.size());
+                    orchestrator.syncItemFinished();
+                }
+
+                @Override
+                public void onError(int errorCode, String description) {
+                    // Ok, something bad happend, just quit
+                    orchestrator.syncItemFailed(errorCode, description);
+                }
+            }, callbackHandler);
+        }
+
+        /**
+         * Deletes recent movies from the database
+         */
+        private void deleteRecentMovies(final ContentResolver contentResolver,
+                                        int hostId) {
+            String where = MediaContract.MoviesColumns.HOST_ID + "=?";
+            contentResolver.delete(MediaContract.MovieCast.CONTENT_URI,
+                    where, new String[]{String.valueOf(hostId)});
+            contentResolver.delete(MediaContract.MoviesRecent.CONTENT_URI,
+                    where, new String[]{String.valueOf(hostId)});
+        }
+
+        /**
+         * Inserts the given movies in the database
+         */
+        private void insertRecentMovies(final SyncOrchestrator orchestrator,
+                                        final ContentResolver contentResolver,
+                                        final List<VideoType.DetailsMovie> movies) {
+            ContentValues movieValuesBatch[] = new ContentValues[movies.size()];
+            int castCount = 0;
+
+            // Iterate on each movie
+            for (int i = 0; i < movies.size(); i++) {
+                VideoType.DetailsMovie movie = movies.get(i);
+                movieValuesBatch[i] = SyncUtils.contentValuesFromMovie(hostId, movie);
+                castCount += movie.cast.size();
+            }
+
+            // Insert the movies
+            contentResolver.bulkInsert(MediaContract.MoviesRecent.CONTENT_URI, movieValuesBatch);
 
             ContentValues movieCastValuesBatch[] = new ContentValues[castCount];
             int count = 0;

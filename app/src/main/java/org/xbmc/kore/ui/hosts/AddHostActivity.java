@@ -15,12 +15,12 @@
  */
 package org.xbmc.kore.ui.hosts;
 
+import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toolbar;
 
 import org.xbmc.kore.R;
 import org.xbmc.kore.host.HostInfo;
@@ -38,6 +38,8 @@ public class AddHostActivity extends BaseActivity
         HostFragmentManualConfiguration.HostManualConfigurationListener,
         AddHostFragmentFinish.AddHostFinishListener {
 
+    private String mNextActivity = "";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,12 +47,14 @@ public class AddHostActivity extends BaseActivity
         // Only load first fragment if we're starting the activity
         if (savedInstanceState == null) {
             AddHostFragmentWelcome firstStep = new AddHostFragmentWelcome();
-            getSupportFragmentManager()
+            getFragmentManager()
                     .beginTransaction()
                     .add(android.R.id.content, firstStep)
                     .commit();
         }
 
+        Intent intent = getIntent();
+        mNextActivity : intent.getStringExtra("nextActivity");
 //        setupActionBar();
 
 //        // Setup system bars and content padding
@@ -75,9 +79,7 @@ public class AddHostActivity extends BaseActivity
     }
 
     private void setupActionBar() {
-        Toolbar toolbar = (Toolbar) findViewById(R.id.default_toolbar);
-        toolbar.setTitle(R.string.add_xbmc);
-        setSupportActionBar(toolbar);
+        getActionBar().setTitle(R.string.add_xbmc);
     }
 
     /**
@@ -151,13 +153,13 @@ public class AddHostActivity extends BaseActivity
      * Finish fragment callbacks
      */
     public void onAddHostFinish() {
-        Intent intent = new Intent(this, RemoteActivity.class)
+        Intent intent = new Intent().setClassName(this, mNextActivity)
                 .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
     }
 
     private void switchToFragment(Fragment fragment) {
-        getSupportFragmentManager()
+        getFragmentManager()
                 .beginTransaction()
                 .replace(android.R.id.content, fragment)
                 .commit();

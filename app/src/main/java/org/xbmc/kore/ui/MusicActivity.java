@@ -16,15 +16,15 @@
 package org.xbmc.kore.ui;
 
 import android.annotation.TargetApi;
+import android.app.ActionBar;
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
-import android.support.v7.widget.Toolbar;
 import android.transition.TransitionInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toolbar;
 
 import org.xbmc.kore.R;
 import org.xbmc.kore.utils.LogUtils;
@@ -68,7 +68,7 @@ public class MusicActivity extends BaseActivity
         setContentView(R.layout.activity_generic_media);
 
         // Set up the drawer.
-        navigationDrawerFragment = (NavigationDrawerFragment) getSupportFragmentManager()
+        navigationDrawerFragment = (NavigationDrawerFragment) getFragmentManager()
                 .findFragmentById(R.id.navigation_drawer);
         navigationDrawerFragment.setUp(R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout));
 
@@ -82,7 +82,7 @@ public class MusicActivity extends BaseActivity
                         .from(this)
                         .inflateTransition(android.R.transition.fade));
             }
-            getSupportFragmentManager()
+            getFragmentManager()
                     .beginTransaction()
                     .add(R.id.fragment_container, musicListFragment)
                     .commit();
@@ -155,25 +155,25 @@ public class MusicActivity extends BaseActivity
                     selectedAlbumId = -1;
                     selectedAlbumTitle = null;
                     setupActionBar(null, selectedArtistName, selectedGenreTitle, selectedMusicVideoTitle);
-                    getSupportFragmentManager().popBackStack();
+                    getFragmentManager().popBackStack();
                     return true;
                 } else if (selectedArtistId != -1) {
                     selectedArtistId = -1;
                     selectedArtistName = null;
                     setupActionBar(selectedAlbumTitle, null, selectedGenreTitle, selectedMusicVideoTitle);
-                    getSupportFragmentManager().popBackStack();
+                    getFragmentManager().popBackStack();
                     return true;
                 } else if (selectedGenreId != -1) {
                     selectedGenreId = -1;
                     selectedGenreTitle = null;
                     setupActionBar(selectedAlbumTitle, selectedArtistName, null, selectedMusicVideoTitle);
-                    getSupportFragmentManager().popBackStack();
+                    getFragmentManager().popBackStack();
                     return true;
                 } else if (selectedMusicVideoId != -1) {
                     selectedMusicVideoId = -1;
                     selectedMusicVideoTitle = null;
                     setupActionBar(selectedAlbumTitle, selectedArtistName, selectedGenreTitle, null);
-                    getSupportFragmentManager().popBackStack();
+                    getFragmentManager().popBackStack();
                     return true;
                 }
                 break;
@@ -209,10 +209,7 @@ public class MusicActivity extends BaseActivity
 
     private void setupActionBar(String albumTitle, String artistName, String genreTitle,
                                 String musicVideoTitle) {
-        Toolbar toolbar = (Toolbar)findViewById(R.id.default_toolbar);
-        setSupportActionBar(toolbar);
-
-        ActionBar actionBar = getSupportActionBar();
+        ActionBar actionBar = getActionBar();
         if (albumTitle != null) {
             navigationDrawerFragment.setDrawerIndicatorEnabled(false);
             actionBar.setTitle(albumTitle);
@@ -237,7 +234,7 @@ public class MusicActivity extends BaseActivity
 
         // Replace list fragment
         AlbumListFragment albumListFragment = AlbumListFragment.newInstanceForArtist(artistId);
-        getSupportFragmentManager()
+        getFragmentManager()
                 .beginTransaction()
                 .setCustomAnimations(R.anim.fragment_details_enter, 0, R.anim.fragment_list_popenter, 0)
                 .replace(R.id.fragment_container, albumListFragment)
@@ -253,7 +250,7 @@ public class MusicActivity extends BaseActivity
 
         // Replace list fragment
         AlbumDetailsFragment albumDetailsFragment = AlbumDetailsFragment.newInstance(albumId);
-        FragmentTransaction fragTrans = getSupportFragmentManager().beginTransaction();
+        FragmentTransaction fragTrans = getFragmentManager().beginTransaction();
 
         // Set up transitions
         if (Utils.isLollipopOrLater()) {
@@ -278,7 +275,7 @@ public class MusicActivity extends BaseActivity
 
         // Replace list fragment
         AlbumListFragment albumListFragment = AlbumListFragment.newInstanceForGenre(genreId);
-        getSupportFragmentManager()
+        getFragmentManager()
                 .beginTransaction()
                 .setCustomAnimations(R.anim.fragment_details_enter, 0, R.anim.fragment_list_popenter, 0)
                 .replace(R.id.fragment_container, albumListFragment)
@@ -294,7 +291,7 @@ public class MusicActivity extends BaseActivity
 
         // Replace list fragment
         MusicVideoDetailsFragment detailsFragment = MusicVideoDetailsFragment.newInstance(musicVideoId);
-        FragmentTransaction fragTrans = getSupportFragmentManager().beginTransaction();
+        FragmentTransaction fragTrans = getFragmentManager().beginTransaction();
 
         // Set up transitions
         if (Utils.isLollipopOrLater()) {

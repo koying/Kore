@@ -174,7 +174,7 @@ public class VideoType {
     }
 
     /**
-     * Enums for Video.Fields.Movie
+     * Enums for Video.Fields.Media
      */
     public interface FieldsMovie {
         public final String TITLE = "title";
@@ -303,7 +303,7 @@ public class VideoType {
     }
 
     /**
-     * Video.Details.Movie
+     * Video.Details.Media
      */
     public static class DetailsMovie extends DetailsFile {
         public static final String CAST = "cast";

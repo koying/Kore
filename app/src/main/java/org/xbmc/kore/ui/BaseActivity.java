@@ -15,10 +15,10 @@
  */
 package org.xbmc.kore.ui;
 
+import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v7.app.ActionBarActivity;
 
 import org.xbmc.kore.Settings;
 import org.xbmc.kore.utils.UIUtils;
@@ -26,7 +26,11 @@ import org.xbmc.kore.utils.UIUtils;
 /**
  * Base activity, where common behaviour is implemented
  */
-public class BaseActivity extends ActionBarActivity {
+public class BaseActivity extends Activity {
+
+    public interface OnPlayListener {
+        public void onPlay(String movieTitle);
+    }
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

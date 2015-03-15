@@ -32,6 +32,7 @@ public class MediaContract {
      */
     public static final String PATH_HOSTS = "hosts";
     public static final String PATH_MOVIES = "movies";
+    public static final String PATH_RECENT_MOVIES = "recent_movies";
     public static final String PATH_MOVIE_CAST = "movie_cast";
     public static final String PATH_TVSHOWS = "tvshows";
     public static final String PATH_TVSHOW_CAST = "tvshow_cast";
@@ -153,6 +154,36 @@ public class MediaContract {
                         .appendPath(PATH_MOVIES)
                         .appendPath(String.valueOf(movieId))
                         .build();
+        }
+
+        /** Read {@link #_ID} from {@link Movies} {@link Uri}. */
+        public static String getMovieId(Uri uri) {
+            return uri.getPathSegments().get(3);
+        }
+
+        public final static String[] ALL_COLUMNS = {
+                _ID, UPDATED, HOST_ID, MOVIEID, FANART, THUMBNAIL, PLAYCOUNT, TITLE, FILE, PLOT,
+                DIRECTOR, RUNTIME, AUDIO_CHANNELS, AUDIO_CODEC, AUDIO_LANGUAGE,
+                SUBTITLES_LANGUAGES, VIDEO_ASPECT, VIDEO_CODEC, VIDEO_HEIGHT, VIDEO_WIDTH,
+                COUNTRIES, GENRES, IMDBNUMBER, MPAA, RATING, SET, SETID, STUDIOS, TAGLINE,
+                TOP250, TRAILER, VOTES, WRITERS, YEAR, DATEADDED
+        };
+    }
+
+    public static class MoviesRecent implements BaseColumns, SyncColumns, MoviesColumns {
+        public static final Uri CONTENT_URI =
+                BASE_CONTENT_URI.buildUpon().appendPath(PATH_RECENT_MOVIES).build();
+
+        public static final String CONTENT_TYPE =
+                "vnd.android.cursor.dir/vnd.syncedsynapse." + PATH_RECENT_MOVIES;
+        public static final String CONTENT_ITEM_TYPE =
+                "vnd.android.cursor.item/vnd.syncedsynapse." + PATH_RECENT_MOVIES;
+
+        /** Build {@link Uri} for recent movies. */
+        public static Uri buildRecentMoviesListUri(long hostId) {
+            return Hosts.buildHostUri(hostId).buildUpon()
+                    .appendPath(PATH_RECENT_MOVIES)
+                    .build();
         }
 
         /** Read {@link #_ID} from {@link Movies} {@link Uri}. */

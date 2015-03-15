@@ -36,6 +36,8 @@
     <string name="files">Files</string>
     <string name="video">Video</string>
     <string name="file_browser">File Browser</string>
+    <string name="recent_movies">Recent Movies</string>
+    <string name="recent_episodes">Recent Episodes</string>
 
     <string name="no_xbmc_configured">No media center configured</string>
     <string name="add_xbmc">Add Media Center</string>
@@ -173,6 +175,9 @@
     <string name="xbmc_unavailable">Unavailable</string>
 
     <string name="nothing_playing">Nothing playing</string>
+    <string name="video_error_media_load_timeout">Media loading timed out</string>
+    <string name="video_error_server_inaccessible">Media server was not reachable</string>
+    <string name="video_error_unknown_error">Failed to load video</string>
 
     <!-- Main view tabs -->
     <string name="now_playing">Now playing</string>

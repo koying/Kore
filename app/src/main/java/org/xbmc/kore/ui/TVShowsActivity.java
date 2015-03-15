@@ -16,16 +16,16 @@
 package org.xbmc.kore.ui;
 
 import android.annotation.TargetApi;
+import android.app.ActionBar;
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
-import android.support.v7.widget.Toolbar;
 import android.transition.TransitionInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
+import android.widget.Toolbar;
 
 import org.xbmc.kore.R;
 import org.xbmc.kore.utils.LogUtils;
@@ -61,7 +61,7 @@ public class TVShowsActivity extends BaseActivity
         setContentView(R.layout.activity_generic_media);
 
         // Set up the drawer.
-        navigationDrawerFragment = (NavigationDrawerFragment) getSupportFragmentManager()
+        navigationDrawerFragment = (NavigationDrawerFragment) getFragmentManager()
                 .findFragmentById(R.id.navigation_drawer);
         navigationDrawerFragment.setUp(R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout));
 
@@ -75,7 +75,7 @@ public class TVShowsActivity extends BaseActivity
                         .from(this)
                         .inflateTransition(android.R.transition.fade));
             }
-            getSupportFragmentManager()
+            getFragmentManager()
                     .beginTransaction()
                     .add(R.id.fragment_container, tvshowListFragment)
                     .commit();
@@ -136,13 +136,13 @@ public class TVShowsActivity extends BaseActivity
                 // The default behaviour is handled by the nav drawer (open/close)
                 if (selectedEpisodeId != -1) {
                     selectedEpisodeId = -1;
-                    getSupportFragmentManager().popBackStack();
+                    getFragmentManager().popBackStack();
                     return true;
                 } else if (selectedTVShowId != -1) {
                     selectedTVShowId = -1;
                     selectedTVShowTitle = null;
                     setupActionBar(null);
-                    getSupportFragmentManager().popBackStack();
+                    getFragmentManager().popBackStack();
                     return true;
                 }
                 break;
@@ -167,10 +167,7 @@ public class TVShowsActivity extends BaseActivity
     }
 
     private void setupActionBar(String tvshowTitle) {
-        Toolbar toolbar = (Toolbar)findViewById(R.id.default_toolbar);
-        setSupportActionBar(toolbar);
-
-        ActionBar actionBar = getSupportActionBar();
+        ActionBar actionBar = getActionBar();
         if (tvshowTitle != null) {
             navigationDrawerFragment.setDrawerIndicatorEnabled(false);
             actionBar.setTitle(tvshowTitle);
@@ -193,7 +190,7 @@ public class TVShowsActivity extends BaseActivity
 
         // Replace list fragment
         TVShowDetailsFragment tvshowDetailsFragment = TVShowDetailsFragment.newInstance(tvshowId);
-        FragmentTransaction fragTrans = getSupportFragmentManager().beginTransaction();
+        FragmentTransaction fragTrans = getFragmentManager().beginTransaction();
 
         // Set up transitions
         if (Utils.isLollipopOrLater()) {
@@ -224,7 +221,7 @@ public class TVShowsActivity extends BaseActivity
         // Replace list fragment
         TVShowEpisodeDetailsFragment fragment =
                 TVShowEpisodeDetailsFragment.newInstance(tvshowId, episodeId);
-        FragmentTransaction fragTrans = getSupportFragmentManager().beginTransaction();
+        FragmentTransaction fragTrans = getFragmentManager().beginTransaction();
 
         // Set up transitions
         if (Utils.isLollipopOrLater()) {

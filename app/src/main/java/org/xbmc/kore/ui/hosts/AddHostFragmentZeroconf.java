@@ -16,11 +16,11 @@
 package org.xbmc.kore.ui.hosts;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.Context;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.Fragment;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;

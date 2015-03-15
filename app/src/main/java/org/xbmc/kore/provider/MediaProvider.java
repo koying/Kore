@@ -44,6 +44,7 @@ public class MediaProvider extends ContentProvider {
     private static final int MOVIES_ALL = 200;
     private static final int MOVIES_LIST = 201;
     private static final int MOVIES_ID = 202;
+    private static final int MOVIES_RECENT = 203;
 
     private static final int MOVIE_CAST_ALL = 210;
     private static final int MOVIE_CAST_LIST = 211;
@@ -106,6 +107,9 @@ public class MediaProvider extends ContentProvider {
 
         // Movies and cast
         matcher.addURI(authority, MediaContract.PATH_MOVIES, MOVIES_ALL);
+        matcher.addURI(authority, MediaContract.PATH_RECENT_MOVIES, MOVIES_RECENT);
+        matcher.addURI(authority, MediaContract.PATH_HOSTS + "/*/" +
+                                  MediaContract.PATH_RECENT_MOVIES, MOVIES_RECENT);
         matcher.addURI(authority, MediaContract.PATH_HOSTS + "/*/" +
                                   MediaContract.PATH_MOVIES, MOVIES_LIST);
         matcher.addURI(authority, MediaContract.PATH_HOSTS + "/*/" +
@@ -229,6 +233,7 @@ public class MediaProvider extends ContentProvider {
                 return MediaContract.Hosts.CONTENT_ITEM_TYPE;
             case MOVIES_ALL:
             case MOVIES_LIST:
+            case MOVIES_RECENT:
                 return MediaContract.Movies.CONTENT_TYPE;
             case MOVIES_ID:
                 return MediaContract.Movies.CONTENT_ITEM_TYPE;
@@ -347,6 +352,10 @@ public class MediaProvider extends ContentProvider {
         switch (match) {
             case MOVIES_ALL: {
                 table = MediaDatabase.Tables.MOVIES;
+                break;
+            }
+            case MOVIES_RECENT: {
+                table = MediaDatabase.Tables.MOVIES_RECENT;
                 break;
             }
             case MOVIE_CAST_ALL: {
@@ -517,6 +526,9 @@ public class MediaProvider extends ContentProvider {
             }
             case MOVIES_ALL: {
                 return builder.table(MediaDatabase.Tables.MOVIES);
+            }
+            case MOVIES_RECENT: {
+                return builder.table(MediaDatabase.Tables.MOVIES_RECENT);
             }
             case MOVIES_LIST: {
                 final String hostId = MediaContract.Hosts.getHostId(uri);

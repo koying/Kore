@@ -38,6 +38,7 @@ public class MediaDatabase extends SQLiteOpenHelper {
 	public interface Tables {
 		public final static String HOSTS = "hosts";
         public final static String MOVIES = "movies";
+        public final static String MOVIES_RECENT = "movies_recent";
         public final static String MOVIE_CAST = "movie_cast";
         public final static String TVSHOWS = "tvshows";
         public final static String TVSHOWS_CAST = "tvshows_cast";
@@ -161,7 +162,47 @@ public class MediaDatabase extends SQLiteOpenHelper {
                    "UNIQUE (" + MediaContract.MoviesColumns.HOST_ID + ", " + MediaContract.MoviesColumns.MOVIEID + ") ON CONFLICT REPLACE)"
         );
 
-        // Movie Cast
+        // Recent Movies
+        db.execSQL("CREATE TABLE " + Tables.MOVIES_RECENT + "(" +
+                        BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                        MediaContract.SyncColumns.UPDATED + " INTEGER NOT NULL," +
+                        MediaContract.MoviesColumns.HOST_ID + " INTEGER NOT NULL " + References.HOST_ID + ", " +
+                        MediaContract.MoviesColumns.MOVIEID + " INTEGER NOT NULL, " +
+                        MediaContract.MoviesColumns.FANART + " TEXT, " +
+                        MediaContract.MoviesColumns.THUMBNAIL + " TEXT, " +
+                        MediaContract.MoviesColumns.PLAYCOUNT + " INTEGER, " +
+                        MediaContract.MoviesColumns.TITLE + " TEXT, " +
+                        MediaContract.MoviesColumns.FILE + " TEXT, " +
+                        MediaContract.MoviesColumns.PLOT + " TEXT, " +
+                        MediaContract.MoviesColumns.DIRECTOR + " TEXT, " +
+                        MediaContract.MoviesColumns.RUNTIME + " INTEGER, " +
+                        MediaContract.MoviesColumns.AUDIO_CHANNELS + " INTEGER, " +
+                        MediaContract.MoviesColumns.AUDIO_CODEC + " TEXT, " +
+                        MediaContract.MoviesColumns.AUDIO_LANGUAGE + " TEXT, " +
+                        MediaContract.MoviesColumns.SUBTITLES_LANGUAGES + " TEXT, " +
+                        MediaContract.MoviesColumns.VIDEO_ASPECT + " REAL, " +
+                        MediaContract.MoviesColumns.VIDEO_CODEC + " TEXT, " +
+                        MediaContract.MoviesColumns.VIDEO_HEIGHT + " INTEGER, " +
+                        MediaContract.MoviesColumns.VIDEO_WIDTH + " INTEGER, " +
+                        MediaContract.MoviesColumns.COUNTRIES + " TEXT, " +
+                        MediaContract.MoviesColumns.GENRES + " TEXT, " +
+                        MediaContract.MoviesColumns.IMDBNUMBER + " TEXT, " +
+                        MediaContract.MoviesColumns.MPAA + " TEXT, " +
+                        MediaContract.MoviesColumns.RATING + " REAL, " +
+                        MediaContract.MoviesColumns.SET + " TEXT, " +
+                        MediaContract.MoviesColumns.SETID + " INTEGER, " +
+                        MediaContract.MoviesColumns.STUDIOS + " TEXT, " +
+                        MediaContract.MoviesColumns.TAGLINE + " TEXT, " +
+                        MediaContract.MoviesColumns.TOP250 + " INTEGER, " +
+                        MediaContract.MoviesColumns.TRAILER + " TEXT, " +
+                        MediaContract.MoviesColumns.VOTES + " TEXT, " +
+                        MediaContract.MoviesColumns.WRITERS + " TEXT, " +
+                        MediaContract.MoviesColumns.YEAR + " INTEGER, " +
+                        MediaContract.MoviesColumns.DATEADDED + " TEXT, " +
+                        "UNIQUE (" + MediaContract.MoviesColumns.HOST_ID + ", " + MediaContract.MoviesColumns.MOVIEID + ") ON CONFLICT REPLACE)"
+        );
+
+        // Media Cast
         db.execSQL("CREATE TABLE " + Tables.MOVIE_CAST + "(" +
                    BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                    MediaContract.SyncColumns.UPDATED + " INTEGER NOT NULL," +
@@ -414,6 +455,7 @@ public class MediaDatabase extends SQLiteOpenHelper {
 
         // Triggers on host delete
         db.execSQL(buildHostsDeleteTrigger(Tables.MOVIES, MediaContract.MoviesColumns.HOST_ID));
+        db.execSQL(buildHostsDeleteTrigger(Tables.MOVIES_RECENT, MediaContract.MoviesColumns.HOST_ID));
         db.execSQL(buildHostsDeleteTrigger(Tables.MOVIE_CAST, MediaContract.MovieCastColumns.HOST_ID));
         db.execSQL(buildHostsDeleteTrigger(Tables.TVSHOWS, MediaContract.TVShowsColumns.HOST_ID));
         db.execSQL(buildHostsDeleteTrigger(Tables.TVSHOWS_CAST, MediaContract.TVShowCastColumns.HOST_ID));
@@ -441,6 +483,7 @@ public class MediaDatabase extends SQLiteOpenHelper {
 		// For now just drop old tables and recreate
 		db.execSQL("DROP TABLE IF EXISTS " + Tables.HOSTS);
         db.execSQL("DROP TABLE IF EXISTS " + Tables.MOVIES);
+        db.execSQL("DROP TABLE IF EXISTS " + Tables.MOVIES_RECENT);
         db.execSQL("DROP TABLE IF EXISTS " + Tables.MOVIE_CAST);
         db.execSQL("DROP TABLE IF EXISTS " + Tables.TVSHOWS);
         db.execSQL("DROP TABLE IF EXISTS " + Tables.TVSHOWS_CAST);

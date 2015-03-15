@@ -22,7 +22,6 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -30,6 +29,7 @@ import android.view.MenuItem;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.Toast;
+import android.widget.Toolbar;
 
 import org.xbmc.kore.R;
 import org.xbmc.kore.Settings;
@@ -77,7 +77,6 @@ public class RemoteActivity extends BaseActivity
     @InjectView(R.id.background_image) ImageView backgroundImage;
     @InjectView(R.id.pager_indicator) CirclePageIndicator pageIndicator;
     @InjectView(R.id.pager) ViewPager viewPager;
-    @InjectView(R.id.default_toolbar) Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,17 +95,18 @@ public class RemoteActivity extends BaseActivity
             final Intent intent = new Intent(this, AddHostActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.putExtra("nextActivity", RemoteActivity.class);
             startActivity(intent);
             finish();
         }
 
         // Set up the drawer.
-        navigationDrawerFragment = (NavigationDrawerFragment) getSupportFragmentManager()
+        navigationDrawerFragment = (NavigationDrawerFragment) getFragmentManager()
                 .findFragmentById(R.id.navigation_drawer);
         navigationDrawerFragment.setUp(R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout));
 
         // Set up pager and fragments
-        TabsAdapter tabsAdapter = new TabsAdapter(this, getSupportFragmentManager())
+        TabsAdapter tabsAdapter = new TabsAdapter(this, getFragmentManager())
                 .addTab(NowPlayingFragment.class, null, R.string.now_playing, 1)
                 .addTab(RemoteFragment.class, null, R.string.remote, 2)
                 .addTab(PlaylistFragment.class, null, R.string.playlist, 3);
@@ -209,7 +209,7 @@ public class RemoteActivity extends BaseActivity
             case R.id.send_text:
                 SendTextDialogFragment dialog =
                         SendTextDialogFragment.newInstance(getString(R.string.send_text));
-                dialog.show(getSupportFragmentManager(), null);
+                dialog.show(getFragmentManager(), null);
                 return true;
             case R.id.toggle_fullscreen:
                 GUI.SetFullscreen actionSetFullscreen = new GUI.SetFullscreen();
@@ -272,23 +272,20 @@ public class RemoteActivity extends BaseActivity
 
 
     private void setupActionBar() {
-        setToolbarTitle(toolbar, 1);
-        setSupportActionBar(toolbar);
+        setToolbarTitle(1);
     }
 
-    private void setToolbarTitle(Toolbar toolbar, int position) {
-        if (toolbar != null) {
-            switch (position) {
-                case 0:
-                    toolbar.setTitle(R.string.now_playing);
-                    break;
-                case 1:
-                    toolbar.setTitle(R.string.remote);
-                    break;
-                case 2:
-                    toolbar.setTitle(R.string.playlist);
-                    break;
-            }
+    private void setToolbarTitle(int position) {
+        switch (position) {
+            case 0:
+                getActionBar().setTitle(R.string.now_playing);
+                break;
+            case 1:
+                getActionBar().setTitle(R.string.remote);
+                break;
+            case 2:
+                getActionBar().setTitle(R.string.playlist);
+                break;
         }
     }
 
@@ -299,7 +296,7 @@ public class RemoteActivity extends BaseActivity
 
         @Override
         public void onPageSelected(int position) {
-            setToolbarTitle(toolbar, position);
+            setToolbarTitle(position);
         }
 
         @Override
@@ -337,7 +334,7 @@ public class RemoteActivity extends BaseActivity
 
                         @Override
                         public void onPageSelected(int position) {
-                            setToolbarTitle(toolbar, position);
+                            setToolbarTitle(position);
                         }
 
                         @Override
@@ -407,7 +404,7 @@ public class RemoteActivity extends BaseActivity
     public void inputOnInputRequested(String title, String type, String value) {
         SendTextDialogFragment dialog =
                 SendTextDialogFragment.newInstance(title);
-        dialog.show(getSupportFragmentManager(), null);
+        dialog.show(getFragmentManager(), null);
     }
 
     public void observerOnStopObserving() {}

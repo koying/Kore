@@ -16,8 +16,15 @@
 package org.xbmc.kore.ui;
 
 import android.app.AlertDialog;
+import android.app.Fragment;
+import android.app.LoaderManager;
+import android.app.UiModeManager;
+import android.content.Context;
+import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.Loader;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.Cursor;
@@ -26,10 +33,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.BaseColumns;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
@@ -52,14 +55,19 @@ import org.xbmc.kore.host.HostInfo;
 import org.xbmc.kore.host.HostManager;
 import org.xbmc.kore.jsonrpc.ApiCallback;
 import org.xbmc.kore.jsonrpc.ApiException;
+import org.xbmc.kore.jsonrpc.HostConnection;
 import org.xbmc.kore.jsonrpc.event.MediaSyncEvent;
+import org.xbmc.kore.jsonrpc.method.Files;
 import org.xbmc.kore.jsonrpc.method.Player;
 import org.xbmc.kore.jsonrpc.method.Playlist;
 import org.xbmc.kore.jsonrpc.method.VideoLibrary;
+import org.xbmc.kore.jsonrpc.type.FilesType;
 import org.xbmc.kore.jsonrpc.type.PlaylistType;
 import org.xbmc.kore.jsonrpc.type.VideoType;
 import org.xbmc.kore.provider.MediaContract;
 import org.xbmc.kore.service.LibrarySyncService;
+import org.xbmc.kore.ui.tv.LeanbackActivity;
+import org.xbmc.kore.ui.tv.PlaybackOverlayActivity;
 import org.xbmc.kore.utils.FileDownloadHelper;
 import org.xbmc.kore.utils.LogUtils;
 import org.xbmc.kore.utils.UIUtils;
@@ -91,6 +99,7 @@ public class MovieDetailsFragment extends Fragment
     private HostManager hostManager;
     private HostInfo hostInfo;
     private EventBus bus;
+    private Boolean mIsTV = false;
 
     /**
      * Handler on which to post RPC callbacks
@@ -111,6 +120,7 @@ public class MovieDetailsFragment extends Fragment
     @InjectView(R.id.exit_transition_view) View exitTransitionView;
     // Buttons
     @InjectView(R.id.fab) ImageButton fabButton;
+    @InjectView(R.id.play) ImageButton playButton;
     @InjectView(R.id.add_to_playlist) ImageButton addToPlaylistButton;
     @InjectView(R.id.go_to_imdb) ImageButton imdbButton;
     @InjectView(R.id.download) ImageButton downloadButton;
@@ -163,6 +173,11 @@ public class MovieDetailsFragment extends Fragment
             return null;
         }
 
+        UiModeManager uiModeManager = (UiModeManager) getActivity().getSystemService(Context.UI_MODE_SERVICE);
+        if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION) {
+            mIsTV = true;
+        }
+
         ViewGroup root = (ViewGroup) inflater.inflate(R.layout.fragment_movie_details, container, false);
         ButterKnife.inject(this, root);
 
@@ -173,20 +188,28 @@ public class MovieDetailsFragment extends Fragment
         swipeRefreshLayout.setOnRefreshListener(this);
         //UIUtils.setSwipeRefreshLayoutColorScheme(swipeRefreshLayout);
 
-        // Setup dim the fanart when scroll changes. Full dim on 4 * iconSize dp
-        Resources resources = getActivity().getResources();
-        final int pixelsToTransparent  = 4 * resources.getDimensionPixelSize(R.dimen.default_icon_size);
-        mediaPanel.getViewTreeObserver().addOnScrollChangedListener(new ViewTreeObserver.OnScrollChangedListener() {
-            @Override
-            public void onScrollChanged() {
-                float y = mediaPanel.getScrollY();
-                float newAlpha = Math.min(1, Math.max(0, 1 - (y / pixelsToTransparent)));
-                mediaArt.setAlpha(newAlpha);
-            }
-        });
-
         FloatingActionButton fab = (FloatingActionButton)fabButton;
-        fab.attachToScrollView((ObservableScrollView) mediaPanel);
+        if (!mIsTV) {
+            // Setup dim the fanart when scroll changes. Full dim on 4 * iconSize dp
+            Resources resources = getActivity().getResources();
+            final int pixelsToTransparent = 4 * resources.getDimensionPixelSize(R.dimen.default_icon_size);
+            mediaPanel.getViewTreeObserver().addOnScrollChangedListener(new ViewTreeObserver.OnScrollChangedListener() {
+                @Override
+                public void onScrollChanged() {
+                    float y = mediaPanel.getScrollY();
+                    float newAlpha = Math.min(1, Math.max(0, 1 - (y / pixelsToTransparent)));
+                    mediaArt.setAlpha(newAlpha);
+                }
+            });
+
+            playButton.setVisibility(View.INVISIBLE);
+            fab.attachToScrollView((ObservableScrollView) mediaPanel);
+        } else {
+            fab.setVisibility(View.INVISIBLE);
+            imdbButton.setVisibility(View.INVISIBLE);
+            downloadButton.setVisibility(View.INVISIBLE);
+            addToPlaylistButton.setVisibility(View.INVISIBLE);
+        }
 
         // Pad main content view to overlap with bottom system bar
 //        UIUtils.setPaddingForSystemBars(getActivity(), mediaPanel, false, false, true);
@@ -360,6 +383,39 @@ public class MovieDetailsFragment extends Fragment
                 // Got an error, show toast
                 Toast.makeText(getActivity(), R.string.unable_to_connect_to_xbmc, Toast.LENGTH_SHORT)
                      .show();
+            }
+        }, callbackHandler);
+    }
+
+    @OnClick(R.id.play)
+    public void onPlayClicked(View v) {
+        if (movieDownloadInfo == null) {
+            // Nothing to download
+            Toast.makeText(getActivity(), R.string.no_files_to_download, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        final HostConnection httpHostConnection = new HostConnection(hostInfo);
+        httpHostConnection.setProtocol(HostConnection.PROTOCOL_HTTP);
+
+        Files.PrepareDownload action = new Files.PrepareDownload(movieDownloadInfo.fileName);
+        action.execute(httpHostConnection, new ApiCallback<FilesType.PrepareDownloadReturnType>() {
+            @Override
+            public void onSucess(FilesType.PrepareDownloadReturnType result) {
+                LeanbackActivity.getSelectedMedia().setVideoUrl(hostInfo.getHttpURL() + "/" + result.path);
+
+                Intent intent = new Intent(getActivity(), PlaybackOverlayActivity.class);
+                intent.putExtra(LeanbackActivity.MEDIA, LeanbackActivity.getSelectedMedia());
+                startActivity(intent);
+            }
+
+            @Override
+            public void onError(int errorCode, String description) {
+                Toast.makeText(getActivity(),
+                        String.format(getActivity().getString(R.string.error_getting_file_information),
+                                LeanbackActivity.getSelectedMedia().getTitle()),
+                        Toast.LENGTH_SHORT)
+                        .show();
             }
         }, callbackHandler);
     }
@@ -565,10 +621,13 @@ public class MovieDetailsFragment extends Fragment
         UIUtils.loadImageWithCharacterAvatar(getActivity(), hostManager,
                 cursor.getString(MovieDetailsQuery.THUMBNAIL), movieTitle,
                 mediaPoster, posterWidth, posterHeight);
-        int artHeight = resources.getDimensionPixelOffset(R.dimen.now_playing_art_height);
-        UIUtils.loadImageIntoImageview(hostManager,
-                cursor.getString(MovieDetailsQuery.FANART),
-                mediaArt, displayMetrics.widthPixels, artHeight);
+
+        if (!mIsTV) {
+            int artHeight = resources.getDimensionPixelOffset(R.dimen.now_playing_art_height);
+            UIUtils.loadImageIntoImageview(hostManager,
+                    cursor.getString(MovieDetailsQuery.FANART),
+                    mediaArt, displayMetrics.widthPixels, artHeight);
+        }
 
         // Setup movie download info
         movieDownloadInfo = new FileDownloadHelper.MovieInfo(
@@ -647,7 +706,7 @@ public class MovieDetailsFragment extends Fragment
     }
 
     /**
-     * Movie details query parameters.
+     * Media details query parameters.
      */
     private interface MovieDetailsQuery {
         String[] PROJECTION = {
@@ -688,7 +747,7 @@ public class MovieDetailsFragment extends Fragment
     }
 
     /**
-     * Movie cast list query parameters.
+     * Media cast list query parameters.
      */
     private interface MovieCastListQuery {
         String[] PROJECTION = {
