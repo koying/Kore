@@ -54,7 +54,7 @@ public class AddHostActivity extends BaseActivity
         }
 
         Intent intent = getIntent();
-        mNextActivity : intent.getStringExtra("nextActivity");
+        mNextActivity = intent.getStringExtra("nextActivity");
 //        setupActionBar();
 
 //        // Setup system bars and content padding

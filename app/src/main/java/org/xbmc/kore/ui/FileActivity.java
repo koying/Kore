@@ -19,7 +19,7 @@ import android.annotation.TargetApi;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
+import android.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.transition.TransitionInflater;
 import android.view.Menu;
@@ -58,7 +58,7 @@ public class FileActivity extends BaseActivity {
         setContentView(R.layout.activity_generic_media);
 
         // Set up the drawer.
-        navigationDrawerFragment = (NavigationDrawerFragment)getSupportFragmentManager()
+        navigationDrawerFragment = (NavigationDrawerFragment)getFragmentManager()
                 .findFragmentById(R.id.navigation_drawer);
         navigationDrawerFragment.setUp(R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout));
 
@@ -72,7 +72,7 @@ public class FileActivity extends BaseActivity {
                         .from(this)
                         .inflateTransition(android.R.transition.fade));
             }
-            getSupportFragmentManager()
+            getFragmentManager()
                     .beginTransaction()
                     .add(R.id.fragment_container, fileListFragment)
                     .commit();
@@ -116,10 +116,7 @@ public class FileActivity extends BaseActivity {
     }
 
     private void setupActionBar(String title) {
-        Toolbar toolbar = (Toolbar)findViewById(R.id.default_toolbar);
-        setSupportActionBar(toolbar);
-
-        ActionBar actionBar = getSupportActionBar();
+        ActionBar actionBar = getActionBar();
         navigationDrawerFragment.setDrawerIndicatorEnabled(true);
         actionBar.setTitle(title);
 

@@ -401,7 +401,7 @@ public class MovieDetailsFragment extends Fragment
         Files.PrepareDownload action = new Files.PrepareDownload(movieDownloadInfo.fileName);
         action.execute(httpHostConnection, new ApiCallback<FilesType.PrepareDownloadReturnType>() {
             @Override
-            public void onSucess(FilesType.PrepareDownloadReturnType result) {
+            public void onSuccess(FilesType.PrepareDownloadReturnType result) {
                 LeanbackActivity.getSelectedMedia().setVideoUrl(hostInfo.getHttpURL() + "/" + result.path);
 
                 Intent intent = new Intent(getActivity(), PlaybackOverlayActivity.class);

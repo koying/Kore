@@ -613,7 +613,7 @@ public class LibrarySyncService extends Service {
             VideoLibrary.GetRecentMovies action = new VideoLibrary.GetRecentMovies(limits, properties);
             action.execute(hostConnection, new ApiCallback<List<VideoType.DetailsMovie>>() {
                 @Override
-                public void onSucess(List<VideoType.DetailsMovie> result) {
+                public void onSuccess(List<VideoType.DetailsMovie> result) {
                     if (startIdx == 0) {
                         // First call, delete movies from DB
                         deleteRecentMovies(contentResolver, hostId);

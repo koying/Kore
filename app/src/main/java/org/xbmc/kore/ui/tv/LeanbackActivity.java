@@ -79,7 +79,7 @@ public class LeanbackActivity extends BaseActivity
             final Intent intent = new Intent(this, AddHostActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            intent.putExtra("nextActivity", LeanbackActivity.class);
+            intent.putExtra("nextActivity", LeanbackActivity.class.getName());
             startActivity(intent);
             finish();
             return;
